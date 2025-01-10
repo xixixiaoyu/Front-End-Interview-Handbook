@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <title>CSS 垂直居中示例</title>
+    <style>
+      /* 通用样式 */
+      .parent {
+        margin: 20px;
+        background: #f0f0f0;
+        border: 1px solid #ccc;
+      }
+
+      .child {
+        width: 100px;
+        height: 100px;
+        background: #3498db;
+        color: white;
+        text-align: center;
+        line-height: 100px;
+      }
+
+      /* 1. Flex 布局 */
+      .flex-parent {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 300px;
+      }
+
+      /* 2. Grid 布局 */
+      .grid-parent {
+        display: grid;
+        place-items: center;
+        height: 300px;
+      }
+
+      /* 3. Position + Transform */
+      .transform-parent {
+        position: relative;
+        height: 300px;
+      }
+      .transform-child {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+
+      /* 4. Position + 负 margin */
+      .margin-parent {
+        position: relative;
+        height: 300px;
+      }
+      .margin-child {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        margin-left: -50px;
+        margin-top: -50px;
+      }
+
+      /* 5. Position + margin auto */
+      .auto-parent {
+        position: relative;
+        height: 300px;
+      }
+      .auto-child {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        margin: auto;
+      }
+
+      /* 6. Table-cell */
+      .table-wrapper {
+        display: table;
+        width: 100%;
+        height: 300px;
+      }
+      .table-parent {
+        display: table-cell;
+        vertical-align: middle;
+        text-align: center;
+      }
+      .table-parent .child {
+        display: inline-block;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- 1. Flex 布局 -->
+    <div class="parent flex-parent">
+      <div class="child">Flex</div>
+    </div>
+
+    <!-- 2. Grid 布局 -->
+    <div class="parent grid-parent">
+      <div class="child">Grid</div>
+    </div>
+
+    <!-- 3. Position + Transform -->
+    <div class="parent transform-parent">
+      <div class="child transform-child">Transform</div>
+    </div>
+
+    <!-- 4. Position + 负 margin -->
+    <div class="parent margin-parent">
+      <div class="child margin-child">Margin</div>
+    </div>
+
+    <!-- 5. Position + margin auto -->
+    <div class="parent auto-parent">
+      <div class="child auto-child">Auto</div>
+    </div>
+
+    <!-- 6. Table-cell -->
+    <div class="parent">
+      <div class="table-wrapper">
+        <div class="table-parent">
+          <div class="child">Table</div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
