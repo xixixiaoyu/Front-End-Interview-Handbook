@@ -1,34 +1,31 @@
 <script setup lang="ts">
-import ParentComponent from './生命周期/ParentComponent.vue'
+import Navigation from './components/Navigation.vue'
 </script>
 
 <template>
-  <ParentComponent />
+  <div class="app">
+    <Navigation />
+    <main class="main-content">
+      <router-view></router-view>
+    </main>
+  </div>
 </template>
 
 <style>
-body {
+* {
   margin: 0;
-  font-family: Arial, sans-serif;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 .app {
+  display: flex;
+  min-height: 100vh;
+}
+
+.main-content {
+  flex: 1;
   padding: 20px;
-}
-
-.toggle-parent {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  padding: 8px 16px;
-  background-color: #ff4757;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.toggle-parent:hover {
-  background-color: #ff6b81;
+  overflow-y: auto;
 }
 </style>
