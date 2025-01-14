@@ -1,3 +1,23 @@
+<template>
+  <div class="parent-component">
+    <h1>生命周期演示</h1>
+    <button @click="toggleChild">
+      {{ showChild ? '销毁子组件' : '创建子组件' }}
+    </button>
+
+    <ChildComponent v-if="showChild" :onLog="addLog" />
+
+    <div class="logs">
+      <h3>生命周期日志：</h3>
+      <ul>
+        <li v-for="(log, index) in logs" :key="index">
+          {{ log }}
+        </li>
+      </ul>
+    </div>
+  </div>
+</template>
+
 <script setup lang="ts">
 import { ref, onMounted, onBeforeMount, onBeforeUnmount, onUnmounted } from 'vue'
 import ChildComponent from './ChildComponent.vue'
@@ -29,26 +49,6 @@ const toggleChild = () => {
   showChild.value = !showChild.value
 }
 </script>
-
-<template>
-  <div class="parent-component">
-    <h1>生命周期演示</h1>
-    <button @click="toggleChild">
-      {{ showChild ? '销毁子组件' : '创建子组件' }}
-    </button>
-
-    <ChildComponent v-if="showChild" :onLog="addLog" />
-
-    <div class="logs">
-      <h3>生命周期日志：</h3>
-      <ul>
-        <li v-for="(log, index) in logs" :key="index">
-          {{ log }}
-        </li>
-      </ul>
-    </div>
-  </div>
-</template>
 
 <style scoped>
 .parent-component {

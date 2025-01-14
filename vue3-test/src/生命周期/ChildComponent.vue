@@ -1,3 +1,10 @@
+<template>
+  <div class="child-component">
+    <h2>子组件</h2>
+    <p>计数器：{{ count }}</p>
+  </div>
+</template>
+
 <script setup lang="ts">
 import { ref, onMounted, onBeforeMount, onBeforeUnmount, onUnmounted } from 'vue'
 
@@ -47,13 +54,6 @@ onUnmounted(() => {
   props.onLog('子组件 - unmounted')
 })
 </script>
-
-<template>
-  <div class="child-component">
-    <h2>子组件</h2>
-    <p>计数器：{{ count }}</p>
-  </div>
-</template>
 
 <style scoped>
 .child-component {

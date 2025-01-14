@@ -17,6 +17,7 @@ import { ref } from 'vue'
 const routes = ref([
   { path: '/lifecycle', name: '生命周期' },
   { path: '/communication', name: '组件通信' },
+  { path: '/v-if-v-show', name: 'v-if与v-show' },
   // 后续可以在这里添加更多路由
 ])
 </script>
