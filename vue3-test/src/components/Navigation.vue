@@ -1,6 +1,6 @@
 <template>
   <nav class="navigation">
-    <h2 class="nav-title">Vue3 教学案例</h2>
+    <h2 class="nav-title">Vue3 面试通关</h2>
     <ul class="nav-list">
       <li v-for="route in routes" :key="route.path">
         <router-link :to="route.path" class="nav-link">
@@ -16,6 +16,7 @@ import { ref } from 'vue'
 
 const routes = ref([
   { path: '/lifecycle', name: '生命周期' },
+  { path: '/communication', name: '组件通信' },
   // 后续可以在这里添加更多路由
 ])
 </script>
