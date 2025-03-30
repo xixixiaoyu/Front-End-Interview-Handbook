@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <!-- 引入 Axios CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <!-- 引入 jQuery CDN -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  </head>
+  <body>
+    <script>
+      // 发送 GET 请求
+      fetch('https://jsonplaceholder.typicode.com/todos/1')
+        .then((response) => {
+          if (!response.ok) {
+            // 需要手动检查状态码
+            throw new Error(`HTTP error! status: ${response.status}`)
+          }
+          return response.json() // 解析 JSON 数据
+        })
+        .then((data) => {
+          console.log('获取成功:', data)
+        })
+        .catch((error) => {
+          console.error('请求出错了:', error)
+        })
+
+      // 发送 POST 请求，这里使用示例地址
+      fetch('https://jsonplaceholder.typicode.com/posts', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name: '张三', age: 30 }), // 发送 JSON 字符串
+      })
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`)
+          }
+          return response.json()
+        })
+        .then((data) => console.log('创建成功:', data))
+        .catch((error) => console.error('请求出错了:', error))
+
+      // XMLHttpRequest (XHR)
+      const xhr = new XMLHttpRequest()
+      xhr.open('GET', 'https://jsonplaceholder.typicode.com/todos/1', true) // true 表示异步
+
+      xhr.onreadystatechange = function () {
+        // readyState 4 表示请求完成
+        if (xhr.readyState === 4) {
+          // status 200-299 表示成功
+          if (xhr.status >= 200 && xhr.status < 300) {
+            try {
+              const data = JSON.parse(xhr.responseText)
+              console.log('获取成功 (XHR):', data)
+            } catch (e) {
+              console.error('解析 JSON 出错:', e)
+            }
+          } else {
+            console.error('请求失败 (XHR):', xhr.status, xhr.statusText)
+          }
+        }
+      }
+
+      xhr.onerror = function () {
+        console.error('网络错误 (XHR)')
+      }
+
+      xhr.send() // 发送请求
+
+      // Axios 示例
+      // 发送 GET 请求
+      axios
+        .get('https://jsonplaceholder.typicode.com/todos/1')
+        .then((response) => {
+          // response.data 就是解析好的数据
+          console.log('获取成功 (Axios):', response.data)
+        })
+        .catch((error) => {
+          // 4xx, 5xx 错误会直接进入 catch
+          console.error('请求出错了 (Axios):', error)
+          if (error.response) {
+            // 请求发出去了，但服务器返回了非 2xx 状态码
+            console.error('错误详情:', error.response.data, error.response.status)
+          } else if (error.request) {
+            // 请求发出去了，但没收到响应 (比如网络问题)
+            console.error('未收到响应:', error.request)
+          } else {
+            // 设置请求时发生了一些事情，触发了错误
+            console.error('请求设置错误:', error.message)
+          }
+        })
+
+      // 发送 POST 请求，使用示例地址
+      axios
+        .post('https://jsonplaceholder.typicode.com/posts', { name: '李四', age: 25 }) // 直接传 JS 对象，Axios 会自动序列化
+        .then((response) => console.log('创建成功 (Axios):', response.data))
+        .catch((error) => console.error('请求出错了 (Axios):', error))
+
+      // jQuery 的 $.ajax 示例
+      $.ajax({
+        url: 'https://jsonplaceholder.typicode.com/todos/1',
+        method: 'GET',
+        dataType: 'json', // 期望服务器返回 json
+        success: function (data) {
+          console.log('获取成功 (jQuery):', data)
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+          console.error('请求出错了 (jQuery):', textStatus, errorThrown)
+        },
+      })
+    </script>
+  </body>
+</html>

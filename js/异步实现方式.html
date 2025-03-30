@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <button id="myButton">点击发请求</button>
+
+    <script>
+      // 1. 回调函数 (Callbacks)
+      function getDataCallback(url, callback) {
+        const xhr = new XMLHttpRequest()
+        xhr.open('GET', url)
+        xhr.onload = () => {
+          if (xhr.status === 200) {
+            callback(null, xhr.response)
+          } else {
+            callback(new Error(xhr.statusText))
+          }
+        }
+        xhr.onerror = () => callback(new Error('网络错误'))
+        xhr.send()
+      }
+
+      getDataCallback('https://jsonplaceholder.typicode.com/todos/1', (err, data) => {
+        if (err) {
+          console.log('出错了:', err)
+          return
+        }
+        console.log('拿到数据了:', data)
+      })
+
+      // 2. Promise
+      function getDataPromise(url) {
+        return new Promise((resolve, reject) => {
+          const xhr = new XMLHttpRequest()
+          xhr.open('GET', url)
+          xhr.onload = () => {
+            if (xhr.status === 200) {
+              resolve(xhr.response)
+            } else {
+              reject(new Error(xhr.statusText))
+            }
+          }
+          xhr.onerror = () => reject(new Error('网络错误'))
+          xhr.send()
+        })
+      }
+
+      getDataPromise('https://jsonplaceholder.typicode.com/todos/1')
+        .then((data) => {
+          console.log('拿到数据了:', data)
+          return getDataPromise('https://jsonplaceholder.typicode.com/todos/2')
+        })
+        .then((moreData) => {
+          console.log('又拿到数据了:', moreData)
+        })
+        .catch((err) => {
+          console.log('出错了:', err)
+        })
+
+      // 3. async/await
+      async function getMultipleData() {
+        try {
+          // 等待第一个请求完成
+          const data = await getDataPromise(
+            'https://jsonplaceholder.typicode.com/todos/1'
+          )
+          console.log('拿到第一批数据:', data)
+
+          // 等待第二个请求完成
+          const moreData = await getDataPromise(
+            'https://jsonplaceholder.typicode.com/todos/2'
+          )
+          console.log('拿到第二批数据:', moreData)
+
+          return { data, moreData }
+        } catch (err) {
+          console.log('获取数据时出错:', err)
+        }
+      }
+
+      getMultipleData()
+
+      // 4. 生成器函数 (Generators)
+      function* fetchDataGenerator() {
+        try {
+          const result1 = yield getDataPromise(
+            'https://jsonplaceholder.typicode.com/todos/1'
+          )
+          console.log('第一步完成:', result1)
+
+          const result2 = yield getDataPromise(
+            'https://jsonplaceholder.typicode.com/todos/2'
+          )
+          console.log('第二步完成:', result2)
+
+          return { result1, result2 }
+        } catch (error) {
+          console.log('出错了:', error)
+        }
+      }
+
+      // 需要一个执行器来运行生成器
+      function run(generator) {
+        const iterator = generator()
+
+        function handle(yielded) {
+          if (yielded.done) return yielded.value
+
+          return Promise.resolve(yielded.value)
+            .then((data) => handle(iterator.next(data)))
+            .catch((err) => handle(iterator.throw(err)))
+        }
+
+        return handle(iterator.next())
+      }
+
+      run(fetchDataGenerator)
+
+      // 5. 事件监听 (Event Listeners)
+      document.addEventListener('DOMContentLoaded', () => {
+        const button = document.querySelector('#myButton')
+        if (button) {
+          button.addEventListener('click', (event) => {
+            console.log('按钮被点击了')
+            getDataPromise('https://jsonplaceholder.typicode.com/todos/1')
+              .then((data) => console.log('按钮点击后拿到数据:', data))
+              .catch((err) => console.log('按钮点击后出错:', err))
+          })
+        }
+      })
+
+      // 6. 响应式编程 (RxJS)
+      // 由于在浏览器环境中直接使用 import 会有跨域和模块加载问题，这里简单模拟
+      // 实际使用时需要引入 RxJS 库
+      // 这里省略了 RxJS 的具体实现，仅展示代码结构
+      // 若要运行此代码，需要在 HTML 中引入 RxJS 库
+      /*
+        import { fromEvent } from 'rxjs';
+        import { debounceTime, map } from 'rxjs/operators';
+
+        document.addEventListener('DOMContentLoaded', () => {
+          const searchInput = document.querySelector('#search');
+          if (searchInput) {
+            const searchInputs$ = fromEvent(searchInput, 'input');
+
+            searchInputs$.pipe(
+              map(event => event.target.value),
+              debounceTime(500) // 等用户停止输入 500ms 后才发送请求
+            ).subscribe(searchTerm => {
+              console.log('搜索词:', searchTerm);
+              // 调用搜索 API
+            });
+          }
+        });
+        */
+    </script>
+  </body>
+</html>
