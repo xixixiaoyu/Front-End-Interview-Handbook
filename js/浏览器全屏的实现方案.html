@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>浏览器全屏的实现方案</title>
+    <style>
+      /* CSS 模拟全屏方案 */
+      .fullscreen-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: #fff;
+        z-index: 9999;
+        overflow: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <button id="fullscreen-btn">进入全屏</button>
+    <div id="content">这是要全屏显示的内容</div>
+    <div id="video-controls">视频控制条</div>
+
+    <script>
+      // 让某个元素进入全屏
+      function openFullscreen(element) {
+        if (element.requestFullscreen) {
+          element.requestFullscreen()
+        } else if (element.webkitRequestFullscreen) {
+          // Safari
+          element.webkitRequestFullscreen()
+        } else if (element.msRequestFullscreen) {
+          // IE11
+          element.msRequestFullscreen()
+        }
+      }
+
+      // 退出全屏
+      function closeFullscreen() {
+        if (document.exitFullscreen) {
+          document.exitFullscreen()
+        } else if (document.webkitExitFullscreen) {
+          // Safari
+          document.webkitExitFullscreen()
+        } else if (document.msExitFullscreen) {
+          // IE11
+          document.msExitFullscreen()
+        }
+      }
+
+      // 点击按钮进入全屏
+      const fullscreenBtn = document.getElementById('fullscreen-btn')
+      const content = document.getElementById('content')
+
+      fullscreenBtn.addEventListener('click', () => {
+        openFullscreen(content)
+      })
+
+      // 检测全屏状态
+      document.addEventListener('fullscreenchange', () => {
+        if (document.fullscreenElement) {
+          console.log('进入全屏模式')
+        } else {
+          console.log('退出全屏模式')
+        }
+      })
+
+      // 横屏锁定（支持度有限）
+      screen.orientation.lock('landscape').catch((err) => {
+        console.log('横屏锁定不支持:', err)
+      })
+
+      // 全屏时隐藏控制
+      let timeout
+      function showControlsTemporarily() {
+        const controls = document.getElementById('video-controls')
+        controls.style.opacity = 1
+
+        clearTimeout(timeout)
+        timeout = setTimeout(() => {
+          controls.style.opacity = 0
+        }, 3000)
+      }
+    </script>
+  </body>
+</html>
