@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>视差滚动效果</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: 'Arial', sans-serif;
+        line-height: 1.6;
+        color: #333;
+      }
+
+      .parallax-container {
+        position: relative;
+        height: 100vh;
+        overflow: hidden;
+      }
+
+      .parallax-bg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 120%;
+        background-image: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb');
+        background-size: cover;
+        background-position: center;
+        transform: translateY(0);
+        will-change: transform;
+      }
+
+      .bg-2 {
+        background-image: url('https://images.unsplash.com/photo-1511300636408-a63a89df3482');
+      }
+
+      .content {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+        text-align: center;
+        color: white;
+        text-shadow: 1px 1px 8px rgba(0, 0, 0, 0.7);
+        padding: 0 20px;
+        z-index: 1;
+      }
+
+      .content h1 {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+      }
+
+      .content p {
+        font-size: 1.5rem;
+      }
+
+      .normal-section {
+        padding: 5rem 2rem;
+        max-width: 1200px;
+        margin: 0 auto;
+        background-color: #f8f8f8;
+      }
+
+      .normal-section h2 {
+        margin-bottom: 1.5rem;
+        font-size: 2.5rem;
+      }
+
+      .normal-section p {
+        margin-bottom: 1rem;
+        font-size: 1.1rem;
+      }
+
+      @media (max-width: 768px) {
+        .content h1 {
+          font-size: 2rem;
+        }
+
+        .content p {
+          font-size: 1rem;
+        }
+
+        .normal-section {
+          padding: 3rem 1.5rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <section class="parallax-container">
+      <div class="parallax-bg"></div>
+      <div class="content">
+        <h1>欢迎来到我的世界</h1>
+        <p>滚动页面，感受视差效果</p>
+      </div>
+    </section>
+
+    <section class="normal-section">
+      <h2>关于视差滚动</h2>
+      <p>视差滚动是一种网页设计技术，能让你的网站看起来更加生动有趣。</p>
+      <p>这种效果通过让不同元素以不同速度移动来实现深度感。</p>
+    </section>
+
+    <section class="parallax-container">
+      <div class="parallax-bg bg-2"></div>
+      <div class="content">
+        <h2>继续探索</h2>
+        <p>第二层视差效果</p>
+      </div>
+    </section>
+
+    <section class="normal-section">
+      <h2>更多内容</h2>
+      <p>这是普通内容区域，没有特殊效果。</p>
+      <p>视差效果适合用于吸引注意力的关键部分。</p>
+    </section>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const parallaxBgs = document.querySelectorAll('.parallax-bg')
+
+        window.addEventListener('scroll', () => {
+          let scrollPosition = window.pageYOffset
+
+          parallaxBgs.forEach((bg) => {
+            const container = bg.parentElement
+            const containerTop = container.offsetTop
+            const containerHeight = container.offsetHeight
+
+            // 只有当容器在视口范围内时才计算视差效果
+            if (
+              scrollPosition + window.innerHeight > containerTop &&
+              scrollPosition < containerTop + containerHeight
+            ) {
+              // 计算背景应该移动的距离
+              const distance = (scrollPosition - containerTop) * 0.4
+
+              // 应用变换
+              bg.style.transform = `translateY(${distance}px)`
+            }
+          })
+        })
+      })
+    </script>
+  </body>
+</html>
