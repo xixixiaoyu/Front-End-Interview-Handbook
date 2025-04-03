@@ -160,3 +160,39 @@ function getProcessor(type) {
 }
 const processor = getProcessor('credit')
 console.log(processor.process(100))
+// 6. 考虑使用三元运算符替代简单的 if-else
+// 优化前
+function checkAgeBefore(age) {
+  if (age >= 18) {
+    return '成年人'
+  } else {
+    return '未成年人'
+  }
+}
+
+// 优化后
+function checkAgeAfter(age) {
+  return age >= 18 ? '成年人' : '未成年人'
+}
+
+console.log(checkAgeBefore(20))
+console.log(checkAgeAfter(20))
+
+// 8. 使用现代语法如 ?. 和 ?? 操作符减少空值判断
+// 优化前
+function getUserInfoBefore(user) {
+  if (user && user.address && user.address.city) {
+    return user.address.city
+  } else {
+    return '未知城市'
+  }
+}
+
+// 优化后
+function getUserInfoAfter(user) {
+  return user?.address?.city ?? '未知城市'
+}
+
+const user = { address: { city: '北京' } }
+console.log(getUserInfoBefore(user))
+console.log(getUserInfoAfter(user))
