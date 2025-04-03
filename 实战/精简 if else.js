@@ -1,235 +1,162 @@
-// 1. 使用对象映射（最简单直接）
+// 1. 使用映射表（对象/Map）
 // 优化前
-function getDiscountRateBefore(memberType) {
-  if (memberType === 'vip') {
+function getDiscountRateBefore(userType) {
+  if (userType === 'vip') {
     return 0.8
-  } else if (memberType === 'regular') {
+  } else if (userType === 'regular') {
     return 0.9
-  } else if (memberType === 'new') {
+  } else if (userType === 'new') {
     return 0.95
   } else {
     return 1
   }
 }
-console.log('getDiscountRateBefore', getDiscountRateBefore('vip')) // 0.8
 
 // 优化后
-function getDiscountRateAfter(memberType) {
+function getDiscountRateAfter(userType) {
   const discountMap = {
     vip: 0.8,
     regular: 0.9,
     new: 0.95,
   }
-
-  return discountMap[memberType] || 1
+  return discountMap[userType] || 1
 }
-console.log('getDiscountRateAfter', getDiscountRateAfter('vip')) // 0.8
+console.log(getDiscountRateBefore('vip'))
+console.log(getDiscountRateAfter('vip'))
 
-// 2. 策略模式（适合复杂逻辑）
+// 2. 策略模式
 // 优化前
-function calculatePriceBefore(product, user, campaign) {
-  if (campaign === 'blackFriday') {
-    // 复杂的黑五价格计算逻辑...
-  } else if (campaign === 'memberDay' && user.isMember) {
-    // 会员日价格计算...
-  } else if (user.isFirstPurchase) {
-    // 首次购买逻辑...
-  } else {
-    // 默认价格计算...
+function calculatePriceBefore(product, paymentType) {
+  let price = product.basePrice
+  if (paymentType === 'credit') {
+    price = price * 1.05
+  } else if (paymentType === 'debit') {
+    price = price * 1.02
+  } else if (paymentType === 'cash') {
+    price = price * 0.98
   }
-}
-// 优化后
-const pricingStrategies = {
-  blackFriday(product, user) {
-    // 黑五逻辑
-    return product.price * 0.7
-  },
-
-  memberDay(product, user) {
-    if (!user.isMember) return null // 不适用此策略
-    return product.price * 0.8
-  },
-
-  firstPurchase(product, user) {
-    if (!user.isFirstPurchase) return null
-    return product.price * 0.9
-  },
-
-  default(product, user) {
-    return product.price
-  },
-}
-
-function calculatePriceAfter(product, user, campaign) {
-  // 尝试使用对应策略，如果返回 null 则尝试下一个策略
-  const price = pricingStrategies[campaign]?.(product, user)
-  if (price !== null) return price
-
-  if (user.isFirstPurchase) {
-    return pricingStrategies.firstPurchase(product, user)
-  }
-
-  return pricingStrategies.default(product, user)
-}
-
-// 3. 工厂模式（适合创建不同对象）
-// 假设存在这些类
-class WechatPayment {}
-class AlipayPayment {}
-class CreditCardPayment {}
-
-// 优化前
-function createPaymentBefore(type) {
-  if (type === 'wechat') {
-    return new WechatPayment()
-  } else if (type === 'alipay') {
-    return new AlipayPayment()
-  } else if (type === 'creditCard') {
-    return new CreditCardPayment()
-  } else {
-    throw new Error('不支持的支付方式')
-  }
+  return price
 }
 
 // 优化后
-const paymentFactory = {
-  wechat: () => new WechatPayment(),
-  alipay: () => new AlipayPayment(),
-  creditCard: () => new CreditCardPayment(),
+const priceStrategies = {
+  credit: (price) => price * 1.05,
+  debit: (price) => price * 1.02,
+  cash: (price) => price * 0.98,
+  default: (price) => price,
+}
+function calculatePriceAfter(product, paymentType) {
+  const strategy = priceStrategies[paymentType] || priceStrategies.default
+  return strategy(product.basePrice)
 }
 
-function createPaymentAfter(type) {
-  const factory = paymentFactory[type]
-  if (!factory) {
-    throw new Error('不支持的支付方式')
-  }
-  return factory()
+console.log(calculatePriceBefore({ basePrice: 100 }, 'credit'))
+console.log(calculatePriceAfter({ basePrice: 100 }, 'credit'))
+
+// 3. 提前返回（Early Return）
+// 假设 doSomething 函数
+function doSomething(user) {
+  return user.name
 }
 
-// 4. 使用多态（面向对象方法）
-// 基类
-class Shape {
-  calculateArea() {
-    throw new Error('子类必须实现此方法')
-  }
-}
-
-class Circle extends Shape {
-  constructor(radius) {
-    super()
-    this.radius = radius
-  }
-
-  calculateArea() {
-    return Math.PI * this.radius * this.radius
-  }
-}
-
-class Rectangle extends Shape {
-  constructor(width, height) {
-    super()
-    this.width = width
-    this.height = height
-  }
-
-  calculateArea() {
-    return this.width * this.height
-  }
-}
-
-// 使用时不需要 if-else 判断形状类型
-function printArea(shape) {
-  console.log(`面积是: ${shape.calculateArea()}`)
-}
-
-// 5. 责任链模式（适合多步骤处理）
-// 假设存在这些类
-class InventoryCheckHandler {
-  process(order) {
-    // 库存检查逻辑
-    return 'completed'
-  }
-}
-class PaymentValidationHandler {
-  process(order) {
-    // 支付验证逻辑
-    return 'completed'
-  }
-}
-class FraudDetectionHandler {
-  process(order) {
-    // 欺诈检测逻辑
-    return 'completed'
-  }
-}
-
-class OrderProcessor {
-  constructor() {
-    this.handlers = []
-  }
-
-  addHandler(handler) {
-    this.handlers.push(handler)
-    return this
-  }
-
-  process(order) {
-    for (const handler of this.handlers) {
-      const result = handler.process(order)
-      if (result === 'completed' || result === 'rejected') {
-        return result
+// 优化前
+function processUserBefore(user) {
+  let result = null
+  if (user) {
+    if (user.isActive) {
+      if (user.hasPermission) {
+        result = doSomething(user)
+      } else {
+        console.log('无权限')
       }
+    } else {
+      console.log('用户未激活')
     }
-    return 'default'
+  } else {
+    console.log('用户不存在')
+  }
+  return result
+}
+
+// 优化后
+function processUserAfter(user) {
+  if (!user) {
+    console.log('用户不存在')
+    return null
+  }
+
+  if (!user.isActive) {
+    console.log('用户未激活')
+    return null
+  }
+
+  if (!user.hasPermission) {
+    console.log('无权限')
+    return null
+  }
+
+  return doSomething(user)
+}
+
+console.log(processUserBefore({ name: 'Alice', isActive: true, hasPermission: true }))
+console.log(processUserAfter({ name: 'Alice', isActive: true, hasPermission: true }))
+
+// 4. 工厂函数
+function createShape(type) {
+  const shapeFactory = {
+    circle: (radius) => ({
+      type: 'circle',
+      radius,
+      area: () => Math.PI * radius * radius,
+    }),
+    rectangle: (width, height) => ({
+      type: 'rectangle',
+      width,
+      height,
+      area: () => width * height,
+    }),
+    triangle: (base, height) => ({
+      type: 'triangle',
+      base,
+      height,
+      area: () => (base * height) / 2,
+    }),
+  }
+
+  return shapeFactory[type] || null
+}
+// 使用
+const circleCreator = createShape('circle')
+const myCircle = circleCreator(5)
+console.log(myCircle.area())
+
+// 5. 多态（面向对象方式）
+// 这里使用 JavaScript 模拟抽象类
+class PaymentProcessor {
+  process(amount) {
+    throw new Error('必须实现 process 方法')
+  }
+}
+
+class CreditCardProcessor extends PaymentProcessor {
+  process(amount) {
+    return amount * 1.05 // 信用卡手续费 5%
+  }
+}
+
+class DebitCardProcessor extends PaymentProcessor {
+  process(amount) {
+    return amount * 1.02 // 借记卡手续费 2%
   }
 }
 
 // 使用
-const order = {}
-const processor = new OrderProcessor()
-  .addHandler(new InventoryCheckHandler())
-  .addHandler(new PaymentValidationHandler())
-  .addHandler(new FraudDetectionHandler())
-
-const result = processor.process(order)
-
-// 小技巧
-// 1. 早期返回：避免深层嵌套
-// 不好的写法
-function processUserBefore(user) {
-  if (user) {
-    if (user.isActive) {
-      if (user.hasPermission) {
-        // 处理逻辑
-      } else {
-        return '无权限'
-      }
-    } else {
-      return '账号未激活'
-    }
-  } else {
-    return '用户不存在'
+function getProcessor(type) {
+  const processors = {
+    credit: new CreditCardProcessor(),
+    debit: new DebitCardProcessor(),
   }
+  return processors[type] || processors.debit
 }
-
-// 好的写法
-function processUserAfter(user) {
-  if (!user) return '用户不存在'
-  if (!user.isActive) return '账号未激活'
-  if (!user.hasPermission) return '无权限'
-
-  // 处理逻辑
-}
-
-// 2. 三元运算符：用于简单条件
-// 长
-const value = 15
-let resultLong
-if (value > 10) {
-  resultLong = 'greater'
-} else {
-  resultLong = 'less'
-}
-
-// 短
-const resultShort = value > 10 ? 'greater' : 'less'
+const processor = getProcessor('credit')
+console.log(processor.process(100))
