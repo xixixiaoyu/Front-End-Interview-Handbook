@@ -1,3 +1,4 @@
+// 也许我们不用那么多的 if else？
 // 1. 使用映射表（对象/Map）
 // 优化前
 function getDiscountRateBefore(userType) {
