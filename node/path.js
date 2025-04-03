@@ -49,9 +49,11 @@ console.log('是否为绝对路径:', path.isAbsolute('./documents'))
 const fs = require('fs')
 
 function loadConfig() {
+  // 解析配置文件的绝对路径，使用当前工作目录和 'config.json' 文件名
   const configPath = path.resolve(process.cwd(), 'config.json')
 
   try {
+    // 同步读取配置文件内容，并将其解析为 JSON 对象
     const config = JSON.parse(fs.readFileSync(configPath, 'utf8'))
     return config
   } catch (error) {
