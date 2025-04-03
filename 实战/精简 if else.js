@@ -161,6 +161,7 @@ function getProcessor(type) {
 }
 const processor = getProcessor('credit')
 console.log(processor.process(100))
+
 // 6. 考虑使用三元运算符替代简单的 if-else
 // 优化前
 function checkAgeBefore(age) {

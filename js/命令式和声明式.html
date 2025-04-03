@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <!-- 引入 Vue 3 CDN -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  </head>
+
+  <body>
+    <!-- 命令式编程示例 -->
+    <div id="app-imperative">
+      <button onclick="updateName('李四')">将名字改为李四</button>
+    </div>
+    <!-- 声明式编程示例 -->
+    <div id="app-declarative"></div>
+
+    <script>
+      // 命令式编程示例
+      const user = { name: '张三' }
+      const container = document.getElementById('app-imperative')
+      const nameElement = document.createElement('div')
+      nameElement.textContent = '你好，' + user.name
+      nameElement.classList.add('greeting')
+      container.appendChild(nameElement)
+
+      // 名字变了？还得自己动手更新
+      function updateName(newName) {
+        user.name = newName
+        nameElement.textContent = '你好，' + newName
+      }
+
+      // 声明式编程示例
+      const { createApp, ref } = Vue
+
+      const app = createApp({
+        template: `
+        <div class="greeting">你好，{{ user.name }}</div>
+        <button @click="changeName">将名字改为李四</button>
+      `,
+        setup() {
+          const user = ref({ name: '张三' })
+
+          const changeName = () => {
+            user.value.name = '李四'
+          }
+
+          return {
+            user,
+            changeName,
+          }
+        },
+      })
+
+      app.mount('#app-declarative')
+    </script>
+  </body>
+</html>
