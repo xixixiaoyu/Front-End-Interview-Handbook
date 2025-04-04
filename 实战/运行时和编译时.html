@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>运行时与编译时示例</title>
+  </head>
+  <body>
+    <!-- 纯运行时框架示例 -->
+    <script>
+      function render(obj, root) {
+        const el = document.createElement(obj.tag)
+
+        if (typeof obj.children === 'string') {
+          const text = document.createTextNode(obj.children)
+          el.appendChild(text)
+        } else if (obj.children) {
+          obj.children.forEach((child) => render(child, el))
+        }
+
+        root.appendChild(el)
+      }
+
+      // 使用方式
+      const obj = {
+        tag: 'div',
+        children: [{ tag: 'span', children: 'hello world' }],
+      }
+
+      render(obj, document.body)
+    </script>
+
+    <!-- 运行时 + 编译时框架示例 -->
+    <script>
+      // 模拟编译器
+      function compiler(html) {
+        const parser = new DOMParser()
+        const doc = parser.parseFromString(html, 'text/html')
+        function convertNode(node) {
+          if (node.nodeType === Node.TEXT_NODE) {
+            return node.textContent.trim()
+          }
+          if (node.nodeType === Node.ELEMENT_NODE) {
+            const children = Array.from(node.childNodes)
+              .map(convertNode)
+              .filter((child) => child)
+            return {
+              tag: node.tagName.toLowerCase(),
+              children: children.length > 0 ? children : null,
+            }
+          }
+          return null
+        }
+        return convertNode(doc.body.firstChild)
+      }
+
+      const html = `
+    <div>
+      <span>hello world</span>
+    </div>
+    `
+      const obj2 = compiler(html)
+      render(obj2, document.body)
+    </script>
+
+    <!-- 纯编译时框架示例（模拟编译后代码） -->
+    <script>
+      const div = document.createElement('div')
+      const span = document.createElement('span')
+      span.textContent = 'hello world'
+      div.appendChild(span)
+      document.body.appendChild(div)
+    </script>
+  </body>
+</html>
