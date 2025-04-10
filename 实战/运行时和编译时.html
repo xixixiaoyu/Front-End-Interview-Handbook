@@ -34,32 +34,48 @@
     <script>
       // 模拟编译器
       function compiler(html) {
+        // 创建一个 DOMParser 实例，用于将 HTML 字符串解析为 DOM 文档
         const parser = new DOMParser()
+        // 使用 DOMParser 将 HTML 字符串解析为 DOM 文档
         const doc = parser.parseFromString(html, 'text/html')
+
+        // 将 DOM 节点转换为对象表示形式
         function convertNode(node) {
+          // 如果节点是文本节点
           if (node.nodeType === Node.TEXT_NODE) {
+            // 返回去除首尾空格后的文本内容
             return node.textContent.trim()
           }
+          // 如果节点是元素节点
           if (node.nodeType === Node.ELEMENT_NODE) {
+            // 将节点的子节点转换为数组
             const children = Array.from(node.childNodes)
+              // 递归调用 convertNode 函数处理每个子节点
               .map(convertNode)
+              // 过滤掉转换结果为假值的子节点
               .filter((child) => child)
+            // 返回表示元素节点的对象
             return {
+              // 标签名转换为小写
               tag: node.tagName.toLowerCase(),
+              // 如果有子节点，则返回子节点数组，否则返回 null
               children: children.length > 0 ? children : null,
             }
           }
+          // 如果节点既不是文本节点也不是元素节点，返回 null
           return null
         }
+        // 从文档的 body 元素的第一个子节点开始转换
         return convertNode(doc.body.firstChild)
       }
 
       const html = `
-    <div>
-      <span>hello world</span>
-    </div>
-    `
+      <div>
+        <span>hello world</span>
+      </div>
+      `
       const obj2 = compiler(html)
+      console.log('obj2', obj2)
       render(obj2, document.body)
     </script>
 
