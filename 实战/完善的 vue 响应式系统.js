@@ -49,7 +49,7 @@ function reactive(data) {
   })
 }
 
-// 使用示例
+// 使用方法示例
 const state = reactive({ count: 0 })
 
 effect(() => {
