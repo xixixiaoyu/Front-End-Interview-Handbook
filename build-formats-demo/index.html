@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>IIFE Build Format Demo</title>
+  </head>
+  <body>
+    <h1>IIFE Build Format Demo</h1>
+    <p>Check the console for output.</p>
+
+    <!-- 
+    直接引入 IIFE 格式的构建产物。
+    Rollup 配置中指定的 `name: 'MyLibrary'` 会将库暴露为全局变量 MyLibrary。
+  -->
+    <script src="./dist/my-library.iife.js"></script>
+    <!-- 你也可以使用生产版本: <script src="./dist/my-library.iife.prod.js"></script> -->
+
+    <script>
+      // 检查全局变量是否存在
+      if (window.MyLibrary) {
+        console.log('MyLibrary (IIFE) loaded:', MyLibrary)
+
+        // 使用导出的函数
+        const message = MyLibrary.greet('World')
+        document.body.innerHTML += `<p>Message from library: ${message}</p>`
+
+        // 调用另一个函数
+        MyLibrary.advancedFeature()
+      } else {
+        console.error('MyLibrary (IIFE) failed to load.')
+      }
+    </script>
+  </body>
+</html>

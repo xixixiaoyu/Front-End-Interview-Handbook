@@ -6,94 +6,283 @@
     <title>运行时与编译时示例</title>
   </head>
   <body>
+    <div id="app"></div>
+
     <!-- 纯运行时框架示例 -->
-    <script>
-      function render(obj, root) {
-        // 处理特殊的文本节点对象
-        if (obj.tag === 'text') {
-          const text = document.createTextNode(obj.children)
-          root.appendChild(text)
-          return
-        }
+    <!-- <script>
+      // 纯运行时框架核心
+      class MiniRuntime {
+        static render(vnode, container) {
+          // 清空容器
+          container.innerHTML = ''
 
-        const el = document.createElement(obj.tag)
+          // 递归创建DOM元素
+          function createDOM(vnode) {
+            // 处理文本节点
+            if (typeof vnode === 'string' || typeof vnode === 'number') {
+              return document.createTextNode(vnode)
+            }
 
-        if (typeof obj.children === 'string') {
-          const text = document.createTextNode(obj.children)
-          el.appendChild(text)
-        } else if (obj.children) {
-          obj.children.forEach((child) => render(child, el))
-        }
+            // 处理元素节点
+            const element = document.createElement(vnode.tag)
 
-        root.appendChild(el)
-      }
+            // 处理属性
+            if (vnode.attrs) {
+              Object.entries(vnode.attrs).forEach(([key, value]) => {
+                if (key.startsWith('on')) {
+                  // 事件处理
+                  const eventName = key.slice(2).toLowerCase()
+                  element.addEventListener(eventName, value)
+                } else {
+                  // 普通属性
+                  element.setAttribute(key, value)
+                }
+              })
+            }
 
-      // 使用方式
-      const obj = {
-        tag: 'div',
-        children: [{ tag: 'span', children: 'hello world' }],
-      }
+            // 处理子节点
+            if (vnode.children) {
+              vnode.children.forEach(child => {
+                element.appendChild(createDOM(child))
+              })
+            }
 
-      render(obj, document.body)
-    </script>
-
-    <!-- 运行时 + 编译时框架示例 -->
-    <script>
-      // 模拟编译器
-      function compiler(html) {
-        // 创建一个 DOMParser 实例，用于将 HTML 字符串解析为 DOM 文档
-        const parser = new DOMParser()
-        // 使用 DOMParser 将 HTML 字符串解析为 DOM 文档
-        const doc = parser.parseFromString(html, 'text/html')
-
-        // 将 DOM 节点转换为对象表示形式
-        function convertNode(node) {
-          // 如果节点是文本节点
-          if (node.nodeType === Node.TEXT_NODE) {
-            const text = node.textContent.trim()
-            // 对文本内容转换为特殊的"文本节点对象"，而不是直接返回字符串
-            return text ? { tag: 'text', children: text } : null
+            return element
           }
-          // 如果节点是元素节点
-          if (node.nodeType === Node.ELEMENT_NODE) {
-            // 将节点的子节点转换为数组
-            const children = Array.from(node.childNodes)
-              // 递归调用 convertNode 函数处理每个子节点
-              .map(convertNode)
-              // 过滤掉转换结果为假值的子节点
-              .filter((child) => child)
-            // 返回表示元素节点的对象
-            return {
-              // 标签名转换为小写
-              tag: node.tagName.toLowerCase(),
-              // 如果有子节点，则返回子节点数组，否则返回 null
-              children: children.length > 0 ? children : null,
+
+          // 开始渲染
+          container.appendChild(createDOM(vnode))
+        }
+      }
+
+      // 使用示例
+      const app = {
+        tag: 'div',
+        attrs: { class: 'container' },
+        children: [
+          {
+            tag: 'h1',
+            children: ['纯运行时框架示例'],
+          },
+          {
+            tag: 'button',
+            attrs: {
+              onClick: () => alert('按钮被点击了！'),
+            },
+            children: ['点击我'],
+          },
+          {
+            tag: 'ul',
+            children: [1, 2, 3].map(num => ({
+              tag: 'li',
+              children: [`列表项 ${num}`],
+            })),
+          },
+        ],
+      }
+
+      // 渲染到页面
+      MiniRuntime.render(app, document.getElementById('app'))
+
+      // 动态生成UI的例子
+      function createDynamicList(items) {
+        return {
+          tag: 'ul',
+          children: items.map(item => ({
+            tag: 'li',
+            children: [item],
+          })),
+        }
+      }
+
+      // 可以根据任何数据源动态生成UI
+      const fruits = ['苹果', '香蕉', '橙子']
+      MiniRuntime.render(
+        createDynamicList(fruits),
+        document.getElementById('dynamic-list')
+      )
+    </script> -->
+
+    <!-- 运行时+编译时框架示例 -->
+    <!-- <script>
+      // 编译器 MiniCompiler
+      class MiniCompiler {
+        static compile(template) {
+          // 这是一个极简的编译器，仅支持基本标签和文本
+          // 实际编译器要复杂得多
+
+          // 移除空白
+          template = template.trim()
+
+          // 解析标签名
+          const tagMatch = template.match(/<([a-z]+)[^>]*>/i)
+          if (!tagMatch) return null
+
+          const tag = tagMatch[1]
+
+          // 解析属性 (简化版)
+          const attrsMatch = template.match(/<[a-z]+\s+([^>]+)>/i)
+          const attrs = {}
+
+          if (attrsMatch && attrsMatch[1]) {
+            const attrsStr = attrsMatch[1]
+            const attrMatches = attrsStr.match(/([a-z]+)="([^"]+)"/gi)
+
+            if (attrMatches) {
+              attrMatches.forEach(attr => {
+                const [key, value] = attr.split('=')
+                attrs[key] = value.replace(/"/g, '')
+              })
             }
           }
-          // 如果节点既不是文本节点也不是元素节点，返回 null
-          return null
+
+          // 提取内容
+          const contentMatch = template.match(
+            new RegExp(`<${tag}[^>]*>(.*)</${tag}>`, 's')
+          )
+          let children = []
+
+          if (contentMatch && contentMatch[1]) {
+            const content = contentMatch[1].trim()
+
+            // 检查是否包含子标签
+            if (content.includes('<')) {
+              // 这里应该递归解析子标签，但为简化示例，我们只处理文本
+              children = [content]
+            } else {
+              children = [content]
+            }
+          }
+
+          // 返回虚拟DOM对象
+          return {
+            tag,
+            attrs,
+            children,
+          }
         }
-        // 从文档的 body 元素的第一个子节点开始转换
-        return convertNode(doc.body.firstChild)
       }
 
-      const html = `
-      <div>
-        <span>hello world</span>
-      </div>
-      `
-      const obj2 = compiler(html)
-      console.log('obj2', obj2)
-      render(obj2, document.body)
-    </script>
+      // 运行时渲染器 MiniRuntime 与前面相同的渲染逻辑
+      class MiniRuntime {
+        static render(vnode, container) {
+          // 清空容器
+          container.innerHTML = ''
 
-    <!-- 纯编译时框架示例（模拟编译后代码） -->
+          // 递归创建DOM元素
+          function createDOM(vnode) {
+            // 处理文本节点
+            if (typeof vnode === 'string' || typeof vnode === 'number') {
+              return document.createTextNode(vnode)
+            }
+
+            // 处理元素节点
+            const element = document.createElement(vnode.tag)
+
+            // 处理属性
+            if (vnode.attrs) {
+              Object.entries(vnode.attrs).forEach(([key, value]) => {
+                if (key.startsWith('on')) {
+                  // 事件处理
+                  const eventName = key.slice(2).toLowerCase()
+                  element.addEventListener(eventName, value)
+                } else {
+                  // 普通属性
+                  element.setAttribute(key, value)
+                }
+              })
+            }
+
+            // 处理子节点
+            if (vnode.children) {
+              vnode.children.forEach(child => {
+                element.appendChild(createDOM(child))
+              })
+            }
+
+            return element
+          }
+
+          // 开始渲染
+          container.appendChild(createDOM(vnode))
+        }
+      }
+
+      // 结合编译器和运行时
+      class MiniFramework {
+        static createApp(template) {
+          return {
+            mount(container) {
+              const vnode = MiniCompiler.compile(template)
+              MiniRuntime.render(vnode, container)
+            },
+          }
+        }
+      }
+
+      // 使用示例
+      const template = `
+        <div class="container">
+          <h1>运行时+编译时框架示例</h1>
+          <p>这是一个段落</p>
+        </div>
+      `
+
+      MiniFramework.createApp(template).mount(document.getElementById('app'))
+    </script> -->
+
+    <!-- 纯编译时框架示例 -->
     <script>
-      const div = document.createElement('div')
-      const span = document.createElement('span')
-      span.textContent = 'hello world'
-      div.appendChild(span)
-      document.body.appendChild(div)
+      // 模拟编译过程 (实际应该在构建阶段完成)
+      function compileToJS(template) {
+        // 这里是一个极简的编译器，将模板直接转换为JavaScript代码
+        // 实际编译器会更复杂，需要解析HTML、处理指令等
+
+        let code = 'function render(container) {\n'
+
+        // 简单解析示例 (非常简化)
+        if (template.includes('<div>')) {
+          code += '  const div = document.createElement("div");\n'
+
+          // 提取div内容
+          const content = template.match(/<div>(.*?)<\/div>/s)[1].trim()
+
+          if (content.includes('<h1>')) {
+            const h1Content = content.match(/<h1>(.*?)<\/h1>/)[1]
+            code += '  const h1 = document.createElement("h1");\n'
+            code += `  h1.textContent = "${h1Content}";\n`
+            code += '  div.appendChild(h1);\n'
+          }
+
+          if (content.includes('<p>')) {
+            const pContent = content.match(/<p>(.*?)<\/p>/)[1]
+            code += '  const p = document.createElement("p");\n'
+            code += `  p.textContent = "${pContent}";\n`
+            code += '  div.appendChild(p);\n'
+          }
+
+          code += '  container.appendChild(div);\n'
+        }
+
+        code += '}'
+
+        // 返回可执行的函数
+        return new Function('return ' + code)()
+      }
+
+      // 模板
+      const template = `
+        <div>
+          <h1>纯编译时框架示例</h1>
+          <p>这段代码在编译时就被转换为原生DOM操作</p>
+        </div>
+        `
+
+      // 编译模板
+      const renderFunction = compileToJS(template)
+
+      // 使用编译后的函数
+      renderFunction(document.getElementById('app'))
     </script>
   </body>
 </html>
