@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+  <head> </head>
+  <body>
+    <!-- MyUtils 浏览器示例 (IIFE) -->
+    <script src="./dist/myutils.global.js"></script>
+
+    <!-- 或者生产环境 -->
+    <!-- <script src="./dist/myutils.global.prod.js"></script> -->
+
+    <script>
+      // MyUtils 作为全局变量可用
+      console.log('版本:', MyUtils.VERSION)
+
+      // 使用数学工具
+      const sum = MyUtils.math.add(5, 3)
+      console.log('5 + 3 =', sum)
+
+      // 使用字符串工具
+      const text = MyUtils.string.capitalize('hello world')
+      console.log('大写首字母:', text)
+
+      // 调用debug函数 - 在开发版本会输出信息，在生产版本则不会
+      MyUtils.debug('这是一条调试信息')
+
+      // 不再需要检查debug函数是否存在，因为它现在总是存在
+      // (错误的旧代码: if (MyUtils.debug) { MyUtils.debug(...); })
+    </script>
+
+    <!-- MyUtils 浏览器示例 (ESM) -->
+    <script type="module">
+      // 导入开发版本，现在可以直接导入debug函数
+      import { math, string, VERSION, debug } from './dist/myutils.esm-browser.prod.js'
+
+      // 或者导入生产版本
+      // import { math, string, VERSION, debug } from './dist/myutils.esm-browser.prod.js';
+
+      console.log('版本:', VERSION)
+
+      // 使用数学工具
+      const product = math.multiply(4, 6)
+      console.log('4 × 6 =', product)
+
+      // 使用字符串工具
+      const reversed = string.reverse('JavaScript')
+      console.log('反转字符串:', reversed)
+
+      // 调用debug函数 - 在开发版本会输出信息，在生产版本则不会
+      debug('ESM模块调试信息')
+    </script>
+  </body>
+</html>
