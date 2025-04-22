@@ -4,68 +4,170 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>运行时和编译时示例</title>
+    <style>
+      .demo-container {
+        border: 1px solid #ddd;
+        padding: 15px;
+        margin-bottom: 20px;
+        border-radius: 5px;
+      }
+      button {
+        margin-left: 10px;
+        padding: 5px 10px;
+      }
+    </style>
   </head>
   <body>
-    <h2>运行时框架示例</h2>
-    <div id="runtime-demo"></div>
+    <h1>前端框架设计模式对比</h1>
 
-    <h2>运行时+编译时框架示例 (Vue风格)</h2>
-    <div id="mixed-demo">
-      <template id="template">
-        <div>
-          <span>计数器：{{count}}</span>
-          <button @click="increment">+1</button>
-        </div>
-      </template>
+    <!-- 纯运行时示例 -->
+    <div class="demo-container">
+      <h2>1. 纯运行时框架示例</h2>
+      <p>特点：完全依赖运行时JavaScript执行，无编译步骤</p>
+      <div id="runtime-demo"></div>
     </div>
 
-    <h2>编译时框架示例 (Svelte风格)</h2>
-    <div id="compile-demo"></div>
+    <!-- 运行时+编译时示例 -->
+    <div class="demo-container">
+      <h2>2. 运行时+编译时框架示例 (Vue风格)</h2>
+      <p>特点：模板编译为渲染函数，运行时执行</p>
+      <div id="mixed-demo">
+        <template id="template">
+          <div>
+            <span>计数器：{{count}}</span>
+            <button @click="increment">+1</button>
+          </div>
+        </template>
+      </div>
+    </div>
+
+    <!-- 纯编译时示例 -->
+    <div class="demo-container">
+      <h2>3. 纯编译时框架示例 (Svelte风格)</h2>
+      <p>特点：编译时生成高效JavaScript代码，运行时几乎没有框架开销</p>
+      <div id="compile-demo"></div>
+    </div>
 
     <script>
-      // 纯运行时示例
+      // ========== 1. 纯运行时示例 ==========
       function render(obj, root) {
         const el = document.createElement(obj.tag)
 
+        // 设置属性
+        if (obj.attrs) {
+          Object.keys(obj.attrs).forEach((key) => {
+            el.setAttribute(key, obj.attrs[key])
+          })
+        }
+
+        // 处理子节点
         if (typeof obj.children === 'string') {
           const text = document.createTextNode(obj.children)
           el.appendChild(text)
         } else if (obj.children) {
-          obj.children.forEach(child => render(child, el))
+          obj.children.forEach((child) => render(child, el))
+        }
+
+        // 处理事件
+        if (obj.events) {
+          Object.keys(obj.events).forEach((event) => {
+            el.addEventListener(event, obj.events[event])
+          })
         }
 
         root.appendChild(el)
       }
 
       // 使用运行时渲染
-      const obj = {
+      const runtimeObj = {
         tag: 'div',
-        children: [{ tag: 'span', children: '这是纯运行时渲染的内容' }],
+        attrs: { class: 'runtime-box' },
+        children: [
+          {
+            tag: 'span',
+            children: '纯运行时示例 - ',
+            attrs: { style: 'color: blue' },
+          },
+          {
+            tag: 'button',
+            children: '点击我',
+            events: {
+              click: () => alert('纯运行时按钮被点击!'),
+            },
+          },
+        ],
       }
-      render(obj, document.getElementById('runtime-demo'))
+      render(runtimeObj, document.getElementById('runtime-demo'))
 
-      // 模拟运行时+编译时框架
+      // ========== 2. 运行时+编译时示例 ==========
       function compiler(template) {
-        // 这里简化了编译过程，实际框架中会更复杂
-        return {
+        // 模拟编译过程 - 实际框架中会生成渲染函数
+        let count = 0
+        const vnode = {
           tag: 'div',
-          children: [{ tag: 'span', children: '这是经过编译后运行时渲染的内容' }],
+          children: [
+            {
+              tag: 'span',
+              children: `计数器：${count}`,
+            },
+            {
+              tag: 'button',
+              children: '+1',
+              events: {
+                click: function () {
+                  count++
+                  // 直接更新vnode的数据结构
+                  vnode.children[0].children = `计数器：${count}`
+                  // 重新渲染
+                  document.getElementById('mixed-demo').innerHTML = ''
+                  render(vnode, document.getElementById('mixed-demo'))
+                },
+              },
+            },
+          ],
         }
+        return vnode
       }
 
       const template = document.getElementById('template').innerHTML
       const compiled = compiler(template)
       render(compiled, document.getElementById('mixed-demo'))
 
-      // 模拟编译时框架生成的代码
+      // ========== 3. 纯编译时示例 ==========
       function createCompiledDemo() {
         const div = document.createElement('div')
         const span = document.createElement('span')
-        span.textContent = '这是纯编译时生成的内容'
+        const button = document.createElement('button')
+
+        span.textContent = '纯编译时示例 - 点击次数: 0'
+        button.textContent = '点击我'
+
+        let count = 0
+        button.addEventListener('click', () => {
+          span.textContent = `纯编译时示例 - 点击次数: ${++count}`
+        })
+
         div.appendChild(span)
+        div.appendChild(button)
         document.getElementById('compile-demo').appendChild(div)
       }
       createCompiledDemo()
+
+      // ========== 性能对比 ==========
+      console.log('性能对比:')
+      console.time('纯运行时渲染100次')
+      for (let i = 0; i < 100; i++) {
+        document.getElementById('runtime-demo').innerHTML = ''
+        render(runtimeObj, document.getElementById('runtime-demo'))
+      }
+      console.timeEnd('纯运行时渲染100次')
+
+      console.time('纯编译时渲染100次')
+      for (let i = 0; i < 100; i++) {
+        document.getElementById('compile-demo').innerHTML = ''
+        createCompiledDemo()
+      }
+      console.timeEnd('纯编译时渲染100次')
     </script>
   </body>
 </html>
