@@ -1,77 +1,83 @@
 import {
   Controller,
-  Get,
   Post,
+  Body,
+  Get,
+  Query,
+  Param,
   Put,
   Delete,
-  Param,
-  Query,
-  Body,
   HttpCode,
-  HttpStatus,
-  Header,
-  Redirect,
+  ParseIntPipe,
+  NotFoundException,
 } from '@nestjs/common';
 import { CreateCatDto } from './dto/create-cat.dto';
+import { UpdateCatDto } from './dto/update-cat.dto'; // 导入 UpdateCatDto
+import { ListAllEntities } from './dto/list-all-entities.dto'; // 导入 ListAllEntities
+import { CatsService } from './cats.service'; // 导入 CatsService
+
+// 模拟 Cat 类型，与 Service 中的保持一致
+interface Cat {
+  id: number;
+  name: string;
+  age: number;
+  breed: string;
+}
 
 @Controller('cats')
 export class CatsController {
-  // 获取所有猫咪
-  @Get()
-  findAll(
-    @Query('limit') limit: string,
-    @Query('breed') breed?: string,
-  ): string {
-    return `返回所有猫咪，限制 ${limit} 条${breed ? `，品种是 ${breed}` : ''}`;
-  }
+  // 注入 CatsService
+  constructor(private readonly catsService: CatsService) {}
 
-  // 获取特定品种
-  @Get('breed')
-  findBreeds(): string {
-    return '这个操作返回所有猫咪的品种';
-  }
-
-  // 获取单个猫咪
-  @Get(':id')
-  findOne(@Param('id') id: string): string {
-    return `这个操作返回 ID 为 #${id} 的猫咪`;
-  }
-
-  // 创建猫咪
   @Post()
-  @HttpCode(HttpStatus.CREATED)
-  @Header('Cache-Control', 'none')
-  create(@Body() createCatDto: CreateCatDto): string {
-    return `创建了猫咪：${createCatDto.name}，品种：${createCatDto.breed}`;
+  @HttpCode(201) // 设置成功创建的状态码为 201
+  async create(@Body() createCatDto: CreateCatDto): Promise<Cat> {
+    console.log('Controller: Received create request with data:', createCatDto);
+    return this.catsService.create(createCatDto);
   }
 
-  // 更新猫咪
+  @Get()
+  async findAll(@Query() query: ListAllEntities): Promise<Cat[]> {
+    console.log('Controller: Received findAll request with query:', query);
+    return this.catsService.findAll(query);
+  }
+
+  @Get(':id')
+  async findOne(@Param('id', ParseIntPipe) id: number): Promise<Cat> {
+    // 使用 ParseIntPipe 转换 id 为数字
+    console.log(`Controller: Received findOne request for id: ${id}`);
+    const cat = await this.catsService.findOne(id);
+    if (!cat) {
+      // 如果找不到猫咪，抛出 NotFoundException
+      throw new NotFoundException(`Cat with ID ${id} not found`);
+    }
+    return cat;
+  }
+
   @Put(':id')
-  update(@Param('id') id: string, @Body() updateCatDto: CreateCatDto): string {
-    return `更新了ID为 ${id} 的猫咪信息，新的猫咪名字是：${updateCatDto.name}，品种是：${updateCatDto.breed}`;
+  async update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateCatDto: UpdateCatDto,
+  ): Promise<Cat> {
+    console.log(
+      `Controller: Received update request for id: ${id} with data:`,
+      updateCatDto,
+    );
+    const updatedCat = await this.catsService.update(id, updateCatDto);
+    if (!updatedCat) {
+      throw new NotFoundException(`Cat with ID ${id} not found`);
+    }
+    return updatedCat;
   }
 
-  // 删除猫咪
   @Delete(':id')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  remove(@Param('id') id: string): string {
-    return `删除了ID为 ${id} 的猫咪`;
-  }
-
-  // 重定向示例
-  @Get('docs')
-  @Redirect('https://docs.nestjs.com', 301)
-  getDocs() {
-    return { url: 'https://docs.nestjs.com/v9/' };
-  }
-
-  // 异步示例
-  @Get('async/all')
-  async findAllAsync(): Promise<any[]> {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve([{ id: 1, name: 'Fluffy' }]);
-      }, 1000);
-    });
+  @HttpCode(204) // 设置成功删除的状态码为 204 No Content
+  async remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
+    console.log(`Controller: Received delete request for id: ${id}`);
+    const success = await this.catsService.remove(id);
+    if (!success) {
+      throw new NotFoundException(`Cat with ID ${id} not found`);
+    }
+    // 成功删除不返回任何内容
   }
 }
